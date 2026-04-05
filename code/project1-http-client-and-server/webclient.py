@@ -1,0 +1,66 @@
+import socket
+import sys
+
+CRLF = "\r\n"
+ENCODING = "iso-8859-1"
+DEFAULT_BUFFER_SIZE = 4096
+DEFAULT_PORT = 80
+
+
+def parse_url_and_port():
+    if len(sys.argv) == 1:
+        print(f"Error: Missing arguments.")
+        print(f"Usage:   python {sys.argv[0]} <url> [port]")
+        print(f"Example: python {sys.argv[0]} example.com 80")
+        sys.exit()
+
+    url = sys.argv[1]
+    port = int(sys.argv[2]) if len(sys.argv) == 3 else DEFAULT_PORT
+
+    return url, port
+
+
+def create_http_get_request(url):
+    s = f"GET / HTTP/1.1{CRLF}"
+    s += f"Host: {url}{CRLF}"
+    s += f"Connection: close{CRLF}"
+    s += CRLF
+
+    return s.encode(ENCODING)
+
+
+def receive_all_data(s):
+    data = ""
+    while True:
+        bytes = s.recv(DEFAULT_BUFFER_SIZE)
+        if not len(bytes):
+            break
+        data += bytes.decode(ENCODING)
+
+    return data
+
+
+# 0. Parse the url and port from the command line args
+url, port = parse_url_and_port()
+
+# 1. Create a socket
+s = socket.socket()
+
+# 2. Get the IP using DNS (optional in python as the connect()
+# method takes care of it) and connect to the IP + port
+s.connect((url, port))
+
+# 3. Create and send the HTTP request
+# GET / HTTP/1.1
+# Host: <url>
+# Connection: close
+# <blank line>
+bytes = create_http_get_request(url)
+s.sendall(bytes)
+
+# 4. Receive all the data
+data = receive_all_data(s)
+print(data)
+
+# 5. Close the socket
+s.close()
