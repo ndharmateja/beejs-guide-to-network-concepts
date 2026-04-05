@@ -12,10 +12,14 @@ def parse_url_and_port():
         print(f"Error: Missing arguments.")
         print(f"Usage:   python {sys.argv[0]} <url> [port]")
         print(f"Example: python {sys.argv[0]} example.com 80")
-        sys.exit()
+        sys.exit(1)
 
     url = sys.argv[1]
-    port = int(sys.argv[2]) if len(sys.argv) == 3 else DEFAULT_PORT
+    try:
+        port = int(sys.argv[2]) if len(sys.argv) == 3 else DEFAULT_PORT
+    except ValueError:
+        print("Error: port must be a valid integer.")
+        sys.exit(1)
 
     return url, port
 
