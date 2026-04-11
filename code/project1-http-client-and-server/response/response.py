@@ -107,3 +107,7 @@ class Response:
         header_str += CRLF
 
         return header_str.encode(ENCODING) + body_bytes
+
+    @staticmethod
+    def decode_bytes(raw_bytes: bytes):
+        return raw_bytes.decode(ENCODING)

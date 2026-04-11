@@ -61,13 +61,14 @@ class WebClient:
                 .set_payload("hey!")
                 .build()
             )
+            print("\nRequest:")
             print(request)
             s.sendall(request.get_bytes())
 
             # 4. Receive all the data
             raw_response_bytes = WebClient.receive_all_data(s)
-            response = Response.from_raw_data(raw_response_bytes)
-            print(response)
+            print("\nResponse:")
+            print(Response.decode_bytes(raw_response_bytes))
 
         # Handle error scenarios
         except socket.gaierror:
