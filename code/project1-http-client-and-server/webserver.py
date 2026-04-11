@@ -1,3 +1,4 @@
+import re
 import socket
 import sys
 
@@ -5,6 +6,11 @@ DEFAULT_LISTENING_PORT = 28333
 DEFAULT_BUFFER_SIZE = 4096
 ENCODING = "iso-8859-1"
 CRLF = "\r\n"
+CONTENT_LENGTH = "Content-Length"
+
+
+class InvalidRequestException(Exception):
+    pass
 
 
 def parse_port():
@@ -17,10 +23,52 @@ def parse_port():
     return port
 
 
+# Raises InvalidRequestException if specified content length is less than
+# the actual length of the payload
+def is_data_receiving_done(total_bytes: bytes):
+    # Decode the bytes
+    data = total_bytes.decode(ENCODING)
+
+    # If the empty line has not been received yet, we can return false
+    double_crlf_index = data.find(CRLF * 2)
+    if double_crlf_index == -1:
+        return False
+
+    # At this point we know that atleast the empty line after the headers
+    # have been received. So we can parse the content length.
+    # Content-Length:  24   \r\n
+    # There could be white spaces before and after the number
+    # and content-length itself could be lowercase
+    match = re.search(r"Content-Length:\s*(\d+)", data, re.IGNORECASE)
+
+    # If content-length header is not there, we can return true
+    # as at this point, we have the double CRLF
+    if not match:
+        return True
+
+    # At this point we can extract the content length
+    content_length = int(match.group(1))
+
+    # We can now check if the number of bytes after the empty line is
+    # equal to the content length
+    payload_start_index = double_crlf_index + len(CRLF * 2)
+    num_bytes_payload = len(data[payload_start_index:].encode(ENCODING))
+
+    # If the number of bytes in the payload is more than what the content length
+    # specifies, we throw an error
+    if num_bytes_payload > content_length:
+        raise InvalidRequestException(
+            "Payload length more than content length specified."
+        )
+
+    return num_bytes_payload == content_length
+
+
 # Since client is not going to (atleast in the general case) close the
 # connection, recv() is not going to return an empty string like in the case
 # of webclient.py
 # So we have to look for the CRLF * 2 in the data
+# Raises InvalidRequestException if request is not valid
 def receive_all_data(s: socket.socket):
     total_bytes = b""
     data = ""
@@ -36,8 +84,7 @@ def receive_all_data(s: socket.socket):
         # In which case a UnicodeDecodeError will be raised and we can continue
         total_bytes += bytes
         try:
-            data = total_bytes.decode(ENCODING)
-            if data.endswith(CRLF * 2):
+            if is_data_receiving_done(total_bytes):
                 break
         except UnicodeDecodeError:
             continue
@@ -95,6 +142,8 @@ def main():
                 # Create the response and send it back
                 response_bytes = create_http_response()
                 conn_socket.sendall(response_bytes)
+            except InvalidRequestException as e:
+                print(f"Invalid request: {e}")
             except Exception as e:
                 print(f"Error handling connection: {e}")
             finally:
