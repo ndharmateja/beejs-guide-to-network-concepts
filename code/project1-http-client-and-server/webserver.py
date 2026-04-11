@@ -30,10 +30,17 @@ def receive_all_data(s: socket.socket):
         if not bytes:
             break
 
-        # Decode and append the data
-        data += bytes.decode(ENCODING)
-        if data.endswith(CRLF * 2):
-            break
+        # Test if the last 4 bytes are CRLF * 2
+        # We add to the total bytes and then decode it because there could
+        # be characters that are split up between 2 recv() calls
+        # In which case a UnicodeDecodeError will be raised and we can continue
+        total_bytes += bytes
+        try:
+            data = total_bytes.decode(ENCODING)
+            if data.endswith(CRLF * 2):
+                break
+        except UnicodeDecodeError:
+            continue
 
     return data
 
