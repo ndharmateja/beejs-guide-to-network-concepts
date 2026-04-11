@@ -1,7 +1,7 @@
 import socket
 import sys
 
-from constants import DEFAULT_BUFFER_SIZE, DEFAULT_PORT
+from constants import DEFAULT_BUFFER_SIZE, DEFAULT_PORT, ContentType
 from request import RequestBuilder
 from response import Response
 
@@ -54,7 +54,14 @@ class WebClient:
             # Host: <url>
             # Connection: close
             # <blank line>
-            request = RequestBuilder().set_host(self.url).set_payload("hey!").build()
+            request = (
+                RequestBuilder()
+                .set_host(self.url)
+                .set_content_type(ContentType.TEXT_PLAIN)
+                .set_payload("hey!")
+                .build()
+            )
+            print(request)
             s.sendall(request.get_bytes())
 
             # 4. Receive all the data

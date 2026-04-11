@@ -9,7 +9,7 @@ class Request:
     DEFAULT_PATH = "/"
     DEFAULT_VERSION = "HTTP/1.1"
     DEFAULT_HOST = "localhost"
-    DEFAULT_CONTENT_TYPE = ContentType.PLAIN_TEXT
+    DEFAULT_CONTENT_TYPE = ContentType.TEXT_PLAIN
 
     def __init__(
         self,
@@ -153,8 +153,24 @@ class Request:
                 .decode(ENCODING)
             )
 
+            # Get content type
+            try:
+                match = re.search(r"Content-Type:\s*(\S*)", data, re.IGNORECASE)
+                content_type_str = match.group(1).upper()
+                content_type = ContentType(content_type_str)
+
+            except ValueError:
+                raise InvalidRequestException(
+                    f"Invalid request. Invalid content type: {content_type_str}"
+                )
+
         return cls(
-            method=method, path=path, version=version, payload=payload, host=host
+            method=method,
+            path=path,
+            version=version,
+            payload=payload,
+            host=host,
+            content_type=content_type,
         )
 
     def get_bytes(self):
