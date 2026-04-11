@@ -33,15 +33,15 @@ def create_http_get_request(url):
     return s.encode(ENCODING)
 
 
-def receive_all_data(s):
-    data = ""
+def receive_all_data(s: socket.socket):
+    total_bytes = b""
     while True:
         bytes = s.recv(DEFAULT_BUFFER_SIZE)
         if not len(bytes):
             break
-        data += bytes.decode(ENCODING)
+        total_bytes += bytes
 
-    return data
+    return total_bytes.decode(ENCODING)
 
 
 def main():
@@ -83,7 +83,7 @@ def main():
     finally:
         # 5. Close the socket
         s.close()
-        print("\nSocket closed")
+        print("\nClient socket closed")
 
 
 if __name__ == "__main__":
