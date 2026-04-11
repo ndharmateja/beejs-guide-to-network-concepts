@@ -24,7 +24,6 @@ def parse_port():
 # Raises InvalidRequestException if request is not valid
 def receive_all_data(s: socket.socket):
     total_bytes = b""
-    data = ""
     while True:
         # If client closes connection
         bytes = s.recv(DEFAULT_BUFFER_SIZE)
@@ -42,7 +41,7 @@ def receive_all_data(s: socket.socket):
         except UnicodeDecodeError:
             continue
 
-    return data
+    return total_bytes.decode(ENCODING)
 
 
 def create_http_response():
@@ -57,11 +56,6 @@ def create_http_response():
     s += response_body
 
     return s.encode(ENCODING)
-
-
-def extract_request_method(request: str):
-    space_index = request.find(" ")
-    return request[:space_index]
 
 
 def main():
@@ -87,10 +81,8 @@ def main():
 
             try:
                 # Receive the data
-                request = receive_all_data(conn_socket)
-                if request:
-                    request_method = extract_request_method(request)
-                    print(f"Request method: {request_method}")
+                request = Request(receive_all_data(conn_socket))
+                print(f"Received request:\n{request}")
 
                 # Create the response and send it back
                 response_bytes = create_http_response()

@@ -59,7 +59,7 @@ class Request:
         # Get the request method, path and version
         # Eg: "GET /index.html HTTP/1.1"
         match = re.search(
-            r"^\s*(GET|POST|DELETE)\s+(/\S+)\s+(HTTP/\d\.\d)",
+            r"^\s*(GET|POST|DELETE)\s+(/\S*)\s+(HTTP/\d\.\d)",
             data,
             re.IGNORECASE,
         )
