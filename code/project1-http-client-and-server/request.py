@@ -90,6 +90,9 @@ class Request:
         s = f"{self.__method} {self.__path} {self.__version}{CRLF}"
         s += f"Host: {self.__host}{CRLF}"
         s += f"Connection: close{CRLF}"
+        # Add the content length header if payload is present
+        if self.__payload:
+            s += f"Content-Length: {len(self.__payload.encode(ENCODING))}{CRLF}"
         s += CRLF
 
         if self.__payload:
