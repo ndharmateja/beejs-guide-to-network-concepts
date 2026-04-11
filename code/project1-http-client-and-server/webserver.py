@@ -71,8 +71,8 @@ class WebServer:
 
                 try:
                     # Receive the data
-                    request = Request()
-                    request.parse_request_data(WebServer.receive_all_data(conn_socket))
+                    raw_request_data = WebServer.receive_all_data(conn_socket)
+                    request = Request.from_raw_data(raw_request_data)
                     print(f"Request:\n[{request}]\n")
 
                     # Create the response and send it back

@@ -97,7 +97,8 @@ class Request:
 
         return s
 
-    def parse_request_data(self, data: str):
+    @classmethod
+    def from_raw_data(cls, data: str):
         # At this point we know that the request data is valid
 
         # Get the request method, path and version
@@ -113,24 +114,32 @@ class Request:
             raise InvalidRequestException("Not a valid request.")
 
         # Extract the method, path and version
-        self.__method = match.group(1).upper()
-        self.__path = match.group(2)
-        self.__version = match.group(3).upper()
+        method = match.group(1).upper()
+        path = match.group(2)
+        version = match.group(3).upper()
+
+        # Extract the host
+        match = re.search(r"Host:\s*(\S*)", data, re.IGNORECASE)
+        host = match.group(1)
 
         # Check if the content length header exists
         double_crlf_index = data.find(CRLF * 2)
         match = re.search(r"Content-Length:\s*(\d+)", data, re.IGNORECASE)
         if not match:
-            self.__payload = None
+            payload = None
         else:
             # Get the exact number of bytes as the content-length
             content_length = int(match.group(1))
             payload_start_index = double_crlf_index + len(CRLF * 2)
-            self.__payload = (
+            payload = (
                 data[payload_start_index:]
                 .encode(ENCODING)[:content_length]
                 .decode(ENCODING)
             )
+
+        return cls(
+            method=method, path=path, version=version, payload=payload, host=host
+        )
 
     def get_bytes(self):
         return self.__str__().encode(ENCODING)
