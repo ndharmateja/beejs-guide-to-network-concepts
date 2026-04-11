@@ -53,7 +53,7 @@ class Request:
             output += f"payload:\n{self.payload}\n"
         return output
 
-    def __init__(self, data: str):
+    def parse_request_data(self, data: str):
         # At this point we know that the request data is valid
 
         # Get the request method, path and version

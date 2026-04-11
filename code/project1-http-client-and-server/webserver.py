@@ -82,8 +82,9 @@ def main():
 
             try:
                 # Receive the data
-                request = Request(receive_all_data(conn_socket))
-                print(f"Received request:\n{request}")
+                request = Request()
+                request.parse_request_data(receive_all_data(conn_socket))
+                print(f"Received request:\n[{request}]")
 
                 # Create the response and send it back
                 response = Response("Hello!")
