@@ -10,8 +10,8 @@ DEFAULT_PORT = 80
 def parse_url_and_port():
     if len(sys.argv) == 1:
         print(f"Error: Missing arguments.")
-        print(f"Usage:   python {sys.argv[0]} <url> [port]")
-        print(f"Example: python {sys.argv[0]} example.com 80")
+        print(f"  Usage  : python {sys.argv[0]} <url> [port]")
+        print(f"  Example: python {sys.argv[0]} example.com 80")
         sys.exit(1)
 
     url = sys.argv[1]
