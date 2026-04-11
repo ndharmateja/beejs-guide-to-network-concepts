@@ -87,3 +87,23 @@ class Request:
                 .encode(ENCODING)[:content_length]
                 .decode(ENCODING)
             )
+
+    def get_bytes(self):
+        s = f"{self.method} {self.path} {self.version}{CRLF}"
+        s += f"Host: {self.host}{CRLF}"
+        s += f"Connection: close{CRLF}"
+        s += CRLF
+
+        if self.payload:
+            s += self.payload
+
+        return s.encode(ENCODING)
+
+    def __init__(
+        self, method="GET", path="/", version="HTTP/1.1", payload=None, host="localhost"
+    ):
+        self.method = method
+        self.path = path
+        self.version = version
+        self.payload = payload
+        self.host = host

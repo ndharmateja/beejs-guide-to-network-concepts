@@ -2,6 +2,7 @@ import socket
 import sys
 
 from constants import CRLF, DEFAULT_BUFFER_SIZE, DEFAULT_PORT, ENCODING
+from request import Request
 
 
 def parse_url_and_port():
@@ -19,15 +20,6 @@ def parse_url_and_port():
         sys.exit(1)
 
     return url, port
-
-
-def create_http_get_request(url):
-    s = f"GET / HTTP/1.1{CRLF}"
-    s += f"Host: {url}{CRLF}"
-    s += f"Connection: close{CRLF}"
-    s += CRLF
-
-    return s.encode(ENCODING)
 
 
 def receive_all_data(s: socket.socket):
@@ -59,8 +51,8 @@ def main():
         # Host: <url>
         # Connection: close
         # <blank line>
-        request_bytes = create_http_get_request(url)
-        s.sendall(request_bytes)
+        request = Request(host=url)
+        s.sendall(request.get_bytes())
 
         # 4. Receive all the data
         data = receive_all_data(s)
