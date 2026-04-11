@@ -12,17 +12,18 @@ class Request:
 
     def __init__(
         self,
-        method=Request.DEFAULT_METHOD,
-        path=Request.DEFAULT_PATH,
-        version=Request.DEFAULT_VERSION,
-        host=Request.DEFAULT_HOST,
+        method=None,
+        path=None,
+        version=None,
+        host=None,
         payload=None,
     ):
-        self.method = method
-        self.path = path
-        self.version = version
-        self.payload = payload
-        self.host = host
+        # Fall back to class constants if no value is provided
+        self.__method = method or self.DEFAULT_METHOD
+        self.__path = path or self.DEFAULT_PATH
+        self.__version = version or self.DEFAULT_VERSION
+        self.__host = host or self.DEFAULT_HOST
+        self.__payload = payload
 
     # Raises InvalidRequestException if specified content length is less than
     # the actual length of the payload
