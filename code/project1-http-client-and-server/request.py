@@ -5,8 +5,28 @@ from errors import InvalidRequestException
 
 
 class Request:
+    DEFAULT_METHOD = "GET"
+    DEFAULT_PATH = "/"
+    DEFAULT_VERSION = "HTTP/1.1"
+    DEFAULT_HOST = "localhost"
+
+    def __init__(
+        self,
+        method=Request.DEFAULT_METHOD,
+        path=Request.DEFAULT_PATH,
+        version=Request.DEFAULT_VERSION,
+        host=Request.DEFAULT_HOST,
+        payload=None,
+    ):
+        self.method = method
+        self.path = path
+        self.version = version
+        self.payload = payload
+        self.host = host
+
     # Raises InvalidRequestException if specified content length is less than
     # the actual length of the payload
+    @staticmethod
     def is_data_receiving_done(total_bytes: bytes):
         # Decode the bytes
         data = total_bytes.decode(ENCODING)
@@ -99,11 +119,41 @@ class Request:
 
         return s.encode(ENCODING)
 
-    def __init__(
-        self, method="GET", path="/", version="HTTP/1.1", payload=None, host="localhost"
-    ):
+
+class RequestBuilder:
+    def __init__(self):
+        self.method = Request.DEFAULT_METHOD
+        self.path = Request.DEFAULT_PATH
+        self.version = Request.DEFAULT_VERSION
+        self.host = Request.DEFAULT_HOST
+        self.payload = None
+
+    def set_method(self, method) -> RequestBuilder:
         self.method = method
+        return self
+
+    def set_path(self, path) -> RequestBuilder:
         self.path = path
-        self.version = version
-        self.payload = payload
+        return self
+
+    def set_host(self, host) -> RequestBuilder:
         self.host = host
+        return self
+
+    def set_version(self, version) -> RequestBuilder:
+        self.version = version
+        return self
+
+    def set_payload(self, payload) -> RequestBuilder:
+        self.payload = payload
+        return self
+
+    def build(self) -> Request:
+        #
+        return Request(
+            method=self.method,
+            path=self.path,
+            version=self.version,
+            payload=self.payload,
+            host=self.host,
+        )

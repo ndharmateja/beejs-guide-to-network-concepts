@@ -2,7 +2,7 @@ import socket
 import sys
 
 from constants import CRLF, DEFAULT_BUFFER_SIZE, DEFAULT_PORT, ENCODING
-from request import Request
+from request import RequestBuilder
 
 
 def parse_url_and_port():
@@ -51,7 +51,7 @@ def main():
         # Host: <url>
         # Connection: close
         # <blank line>
-        request = Request(host=url)
+        request = RequestBuilder().set_host(url).build()
         s.sendall(request.get_bytes())
 
         # 4. Receive all the data
