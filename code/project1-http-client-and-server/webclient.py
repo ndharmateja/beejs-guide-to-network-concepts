@@ -54,7 +54,7 @@ class WebClient:
             # Host: <url>
             # Connection: close
             # <blank line>
-            request = RequestBuilder().set_host(self.url).build()
+            request = RequestBuilder().set_host(self.url).set_payload("hey!").build()
             s.sendall(request.get_bytes())
 
             # 4. Receive all the data
