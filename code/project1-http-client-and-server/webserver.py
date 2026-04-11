@@ -88,7 +88,7 @@ def main():
 
                 # Create the response and send it back
                 response = Response("Hello!")
-                conn_socket.sendall(response.get_response_bytes())
+                conn_socket.sendall(response.get_bytes())
             except InvalidRequestException as e:
                 print(f"Invalid request: {e}")
             except Exception as e:
