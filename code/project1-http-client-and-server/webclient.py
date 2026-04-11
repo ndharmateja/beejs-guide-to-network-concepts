@@ -22,58 +22,65 @@ def parse_url_and_port():
     return url, port
 
 
-def receive_all_data(s: socket.socket):
-    total_bytes = b""
-    while True:
-        bytes = s.recv(DEFAULT_BUFFER_SIZE)
-        if not len(bytes):
-            break
-        total_bytes += bytes
+class WebClient:
+    @staticmethod
+    def receive_all_data(s: socket.socket):
+        total_bytes = b""
+        while True:
+            bytes = s.recv(DEFAULT_BUFFER_SIZE)
+            if not len(bytes):
+                break
+            total_bytes += bytes
 
-    return total_bytes.decode(ENCODING)
+        return total_bytes.decode(ENCODING)
 
+    def __init__(self, url, port):
+        self.url = url
+        self.port = port
 
-def main():
-    # 0. Parse the url and port from the command line args
-    url, port = parse_url_and_port()
+    def run(self):
+        # 1. Create a socket and set timeout
+        s = socket.socket()
+        s.settimeout(10.0)
 
-    # 1. Create a socket and set timeout
-    s = socket.socket()
-    s.settimeout(10.0)
+        try:
+            # 2. Get the IP using DNS (optional in python as the connect()
+            # method takes care of it) and connect to the IP + port
+            s.connect((self.url, self.port))
 
-    try:
-        # 2. Get the IP using DNS (optional in python as the connect()
-        # method takes care of it) and connect to the IP + port
-        s.connect((url, port))
+            # 3. Create and send the HTTP request
+            # GET / HTTP/1.1
+            # Host: <url>
+            # Connection: close
+            # <blank line>
+            request = RequestBuilder().set_host(self.url).build()
+            s.sendall(request.get_bytes())
 
-        # 3. Create and send the HTTP request
-        # GET / HTTP/1.1
-        # Host: <url>
-        # Connection: close
-        # <blank line>
-        request = RequestBuilder().set_host(url).build()
-        s.sendall(request.get_bytes())
+            # 4. Receive all the data
+            data = WebClient.receive_all_data(s)
+            print(data)
 
-        # 4. Receive all the data
-        data = receive_all_data(s)
-        print(data)
+        # Handle error scenarios
+        except socket.gaierror:
+            print(f"Error: Couldn't resolve '{self.url}'. Check spelling and internet.")
+        except ConnectionRefusedError:
+            print(f"Error: Connection refused on port {self.port}.")
+        except socket.timeout:
+            print(f"Error: Connection timed out.")
+        except Exception as e:
+            print("Unexpected error: {e}.")
 
-    # Handle error scenarios
-    except socket.gaierror:
-        print(f"Error: Couldn't resolve '{url}'. Check spelling and internet.")
-    except ConnectionRefusedError:
-        print(f"Error: Connection refused on port {port}.")
-    except socket.timeout:
-        print(f"Error: Connection timed out.")
-    except Exception as e:
-        print("Unexpected error: {e}.")
-
-    # Cleanup resources
-    finally:
-        # 5. Close the socket
-        s.close()
-        print("\nClient socket closed")
+        # Cleanup resources
+        finally:
+            # 5. Close the socket
+            s.close()
+            print("\nClient socket closed")
 
 
 if __name__ == "__main__":
-    main()
+    # Parse the url and port from the command line args
+    url, port = parse_url_and_port()
+
+    # Create and run the client
+    client = WebClient(url, port)
+    client.run()
