@@ -23,3 +23,8 @@ class ContentType(Enum):
     TEXT_PLAIN = "text/plain"
     TEXT_HTML = "text/html"
     JSON = "application/json"
+    PDF = "application/pdf"
+    OCTET_STREAM = "application/octet-stream"
+    JPEG = "image/jpeg"
+    PNG = "image/png"
+    GIF = "image/gif"
