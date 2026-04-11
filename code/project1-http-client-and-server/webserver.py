@@ -2,7 +2,7 @@ import re
 import socket
 import sys
 
-from constants import CRLF, DEFAULT_BUFFER_SIZE, DEFAULT_LISTENING_PORT, ENCODING
+from constants import DEFAULT_BUFFER_SIZE, DEFAULT_LISTENING_PORT, ENCODING
 from errors import InvalidRequestException
 from request import Request
 from response import ResponseBuilder
