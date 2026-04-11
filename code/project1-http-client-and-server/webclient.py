@@ -1,10 +1,7 @@
 import socket
 import sys
 
-CRLF = "\r\n"
-ENCODING = "iso-8859-1"
-DEFAULT_BUFFER_SIZE = 4096
-DEFAULT_PORT = 80
+from constants import CRLF, DEFAULT_BUFFER_SIZE, DEFAULT_PORT, ENCODING
 
 
 def parse_url_and_port():

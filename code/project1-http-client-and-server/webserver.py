@@ -2,11 +2,7 @@ import re
 import socket
 import sys
 
-DEFAULT_LISTENING_PORT = 28333
-DEFAULT_BUFFER_SIZE = 4096
-ENCODING = "iso-8859-1"
-CRLF = "\r\n"
-CONTENT_LENGTH = "Content-Length"
+from constants import CRLF, DEFAULT_BUFFER_SIZE, DEFAULT_LISTENING_PORT, ENCODING
 
 
 class InvalidRequestException(Exception):
