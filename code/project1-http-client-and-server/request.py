@@ -67,12 +67,15 @@ class Request:
         return num_bytes_payload == content_length
 
     def __str__(self):
-        output = f"method: {self.method}\n"
-        output += f"path: {self.path}\n"
-        output += f"http version: {self.version}\n"
-        if self.payload:
-            output += f"payload:\n{self.payload}\n"
-        return output
+        s = f"{self.__method} {self.__path} {self.__version}{CRLF}"
+        s += f"Host: {self.__host}{CRLF}"
+        s += f"Connection: close{CRLF}"
+        s += CRLF
+
+        if self.__payload:
+            s += self.__payload
+
+        return s
 
     def parse_request_data(self, data: str):
         # At this point we know that the request data is valid
@@ -90,35 +93,27 @@ class Request:
             raise InvalidRequestException("Not a valid request.")
 
         # Extract the method, path and version
-        self.method = match.group(1).upper()
-        self.path = match.group(2)
-        self.version = match.group(3).upper()
+        self.__method = match.group(1).upper()
+        self.__path = match.group(2)
+        self.__version = match.group(3).upper()
 
         # Check if the content length header exists
         double_crlf_index = data.find(CRLF * 2)
         match = re.search(r"Content-Length:\s*(\d+)", data, re.IGNORECASE)
         if not match:
-            self.payload = None
+            self.__payload = None
         else:
             # Get the exact number of bytes as the content-length
             content_length = int(match.group(1))
             payload_start_index = double_crlf_index + len(CRLF * 2)
-            self.payload = (
+            self.__payload = (
                 data[payload_start_index:]
                 .encode(ENCODING)[:content_length]
                 .decode(ENCODING)
             )
 
     def get_bytes(self):
-        s = f"{self.method} {self.path} {self.version}{CRLF}"
-        s += f"Host: {self.host}{CRLF}"
-        s += f"Connection: close{CRLF}"
-        s += CRLF
-
-        if self.payload:
-            s += self.payload
-
-        return s.encode(ENCODING)
+        return self.__str__().encode(ENCODING)
 
 
 class RequestBuilder:
@@ -129,23 +124,23 @@ class RequestBuilder:
         self.host = Request.DEFAULT_HOST
         self.payload = None
 
-    def set_method(self, method) -> RequestBuilder:
+    def set_method(self, method):
         self.method = method
         return self
 
-    def set_path(self, path) -> RequestBuilder:
+    def set_path(self, path):
         self.path = path
         return self
 
-    def set_host(self, host) -> RequestBuilder:
+    def set_host(self, host):
         self.host = host
         return self
 
-    def set_version(self, version) -> RequestBuilder:
+    def set_version(self, version):
         self.version = version
         return self
 
-    def set_payload(self, payload) -> RequestBuilder:
+    def set_payload(self, payload):
         self.payload = payload
         return self
 
