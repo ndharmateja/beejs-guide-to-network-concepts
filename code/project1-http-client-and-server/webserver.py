@@ -5,6 +5,7 @@ import sys
 from constants import CRLF, DEFAULT_BUFFER_SIZE, DEFAULT_LISTENING_PORT, ENCODING
 from errors import InvalidRequestException
 from request import Request
+from response import Response
 
 
 def parse_port():
@@ -85,8 +86,8 @@ def main():
                 print(f"Received request:\n{request}")
 
                 # Create the response and send it back
-                response_bytes = create_http_response()
-                conn_socket.sendall(response_bytes)
+                response = Response("Hello!")
+                conn_socket.sendall(response.get_response_bytes())
             except InvalidRequestException as e:
                 print(f"Invalid request: {e}")
             except Exception as e:
