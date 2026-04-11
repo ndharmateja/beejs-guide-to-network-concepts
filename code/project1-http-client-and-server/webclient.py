@@ -1,8 +1,9 @@
 import socket
 import sys
 
-from constants import CRLF, DEFAULT_BUFFER_SIZE, DEFAULT_PORT, ENCODING
+from constants import DEFAULT_BUFFER_SIZE, DEFAULT_PORT
 from request import RequestBuilder
+from response import Response
 
 
 def parse_url_and_port():
@@ -32,7 +33,7 @@ class WebClient:
                 break
             total_bytes += bytes
 
-        return total_bytes.decode(ENCODING)
+        return total_bytes
 
     def __init__(self, url, port):
         self.url = url
@@ -57,8 +58,9 @@ class WebClient:
             s.sendall(request.get_bytes())
 
             # 4. Receive all the data
-            data = WebClient.receive_all_data(s)
-            print(data)
+            raw_response_bytes = WebClient.receive_all_data(s)
+            response = Response.from_raw_data(raw_response_bytes)
+            print(response)
 
         # Handle error scenarios
         except socket.gaierror:

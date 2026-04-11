@@ -5,7 +5,7 @@ import sys
 from constants import CRLF, DEFAULT_BUFFER_SIZE, DEFAULT_LISTENING_PORT, ENCODING
 from errors import InvalidRequestException
 from request import Request
-from response import Response
+from response import ResponseBuilder
 
 
 def parse_port():
@@ -76,9 +76,10 @@ class WebServer:
                     print(f"Request:\n[{request}]\n")
 
                     # Create the response and send it back
-                    response = Response("Hello!")
+                    response = ResponseBuilder().set_content("Hello!").build()
                     print(f"Response:\n[{response}]\n")
                     conn_socket.sendall(response.get_bytes())
+
                 except InvalidRequestException as e:
                     print(f"Invalid request: {e}")
                 except Exception as e:
