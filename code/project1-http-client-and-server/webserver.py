@@ -45,20 +45,6 @@ def receive_all_data(s: socket.socket):
     return total_bytes.decode(ENCODING)
 
 
-def create_http_response():
-    response_body = "Hello!"
-    content_length = len(response_body.encode(ENCODING))
-
-    s = f"HTTP/1.1 200 OK{CRLF}"
-    s += f"Content-Type: text/plain{CRLF}"
-    s += f"Content-Length: {content_length}{CRLF}"
-    s += f"Connection: close{CRLF}"
-    s += CRLF
-    s += response_body
-
-    return s.encode(ENCODING)
-
-
 def main():
     # 0. Parse args
     port = parse_port()
@@ -84,10 +70,11 @@ def main():
                 # Receive the data
                 request = Request()
                 request.parse_request_data(receive_all_data(conn_socket))
-                print(f"Received request:\n[{request}]")
+                print(f"Request:\n[{request}]\n")
 
                 # Create the response and send it back
                 response = Response("Hello!")
+                print(f"Response:\n[{response}]\n")
                 conn_socket.sendall(response.get_bytes())
             except InvalidRequestException as e:
                 print(f"Invalid request: {e}")
