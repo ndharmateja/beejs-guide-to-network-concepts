@@ -1,22 +1,24 @@
 import re
 
-from constants import CRLF, ENCODING
+from constants import CRLF, ENCODING, ContentType, HttpMethod
 from errors import InvalidRequestException
 
 
 class Request:
-    DEFAULT_METHOD = "GET"
+    DEFAULT_METHOD = HttpMethod.GET
     DEFAULT_PATH = "/"
     DEFAULT_VERSION = "HTTP/1.1"
     DEFAULT_HOST = "localhost"
+    DEFAULT_CONTENT_TYPE = ContentType.PLAIN_TEXT
 
     def __init__(
         self,
-        method=None,
-        path=None,
-        version=None,
-        host=None,
-        payload=None,
+        method: HttpMethod = None,
+        path: str = None,
+        version: str = None,
+        host: str = None,
+        payload: str = None,
+        content_type: ContentType = None,
     ):
         # Fall back to class constants if no value is provided
         self.__method = method or self.DEFAULT_METHOD
@@ -24,26 +26,31 @@ class Request:
         self.__version = version or self.DEFAULT_VERSION
         self.__host = host or self.DEFAULT_HOST
         self.__payload = payload
+        self.__content_type = content_type or self.DEFAULT_CONTENT_TYPE
 
     @property
-    def method(self):
+    def method(self) -> HttpMethod:
         return self.__method
 
     @property
-    def path(self):
+    def path(self) -> str:
         return self.__path
 
     @property
-    def version(self):
+    def version(self) -> str:
         return self.__version
 
     @property
-    def payload(self):
+    def payload(self) -> str:
         return self.__payload
 
     @property
-    def host(self):
+    def host(self) -> str:
         return self.__host
+
+    @property
+    def content_type(self) -> ContentType:
+        return self.__content_type
 
     # Raises InvalidRequestException if specified content length is less than
     # the actual length of the payload
@@ -87,12 +94,14 @@ class Request:
         return num_bytes_payload == content_length
 
     def __str__(self):
-        s = f"{self.__method} {self.__path} {self.__version}{CRLF}"
+        s = f"{self.__method.value} {self.__path} {self.__version}{CRLF}"
         s += f"Host: {self.__host}{CRLF}"
         s += f"Connection: close{CRLF}"
-        # Add the content length header if payload is present
+        # Add the content length and type headers if payload is present
         if self.__payload:
-            s += f"Content-Length: {len(self.__payload.encode(ENCODING))}{CRLF}"
+            payload_bytes = self.__payload.encode(ENCODING)
+            s += f"Content-Length: {len(payload_bytes)}{CRLF}"
+            s += f"Content-Type: {self.__content_type.value}{CRLF}"
         s += CRLF
 
         if self.__payload:
@@ -106,8 +115,10 @@ class Request:
 
         # Get the request method, path and version
         # Eg: "GET /index.html HTTP/1.1"
+        # methods_pattern will be "GET|POST|DELETE" based on the enum
+        methods_pattern = "|".join([method.value for method in HttpMethod])
         match = re.search(
-            r"^\s*(GET|POST|DELETE)\s+(/\S*)\s+(HTTP/\d\.\d)",
+            rf"^\s*({methods_pattern})\s+(/\S*)\s+(HTTP/\d\.\d)",
             data,
             re.IGNORECASE,
         )
@@ -117,13 +128,15 @@ class Request:
             raise InvalidRequestException("Not a valid request.")
 
         # Extract the method, path and version
-        method = match.group(1).upper()
+        method_str = match.group(1).upper()
         path = match.group(2)
         version = match.group(3).upper()
 
+        method = HttpMethod(method_str)
+
         # Extract the host
         match = re.search(r"Host:\s*(\S*)", data, re.IGNORECASE)
-        host = match.group(1)
+        host = match.group(1) if match else cls.DEFAULT_HOST
 
         # Check if the content length header exists
         double_crlf_index = data.find(CRLF * 2)
@@ -155,25 +168,34 @@ class RequestBuilder:
         self.version = Request.DEFAULT_VERSION
         self.host = Request.DEFAULT_HOST
         self.payload = None
+        self.content_type = Request.DEFAULT_CONTENT_TYPE
 
-    def set_method(self, method):
+    def set_method(self, method: HttpMethod) -> "RequestBuilder":
+        if not isinstance(method, HttpMethod):
+            raise TypeError("Method must be a valid HttpMethod enum")
         self.method = method
         return self
 
-    def set_path(self, path):
+    def set_path(self, path: str) -> "RequestBuilder":
         self.path = path
         return self
 
-    def set_host(self, host):
+    def set_host(self, host: str) -> "RequestBuilder":
         self.host = host
         return self
 
-    def set_version(self, version):
+    def set_version(self, version: str) -> "RequestBuilder":
         self.version = version
         return self
 
-    def set_payload(self, payload):
+    def set_payload(self, payload: str) -> "RequestBuilder":
         self.payload = payload
+        return self
+
+    def set_content_type(self, content_type: ContentType) -> "RequestBuilder":
+        if not isinstance(content_type, ContentType):
+            raise TypeError("Content type must be a valid ContentType enum")
+        self.content_type = content_type
         return self
 
     def build(self) -> Request:
@@ -184,4 +206,5 @@ class RequestBuilder:
             version=self.version,
             payload=self.payload,
             host=self.host,
+            content_type=self.content_type,
         )
