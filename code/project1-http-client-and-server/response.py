@@ -8,7 +8,7 @@ class Response:
         self.status_message = "OK"
         self.content = content
 
-    def get_bytes(self):
+    def __str__(self):
         s = f"{self.version} {self.status_code} {self.status_message}{CRLF}"
         s += f"Content-Type: text/plain{CRLF}"
         s += f"Content-Length: {len(self.content.encode(ENCODING))}{CRLF}"
@@ -16,4 +16,7 @@ class Response:
         s += CRLF
         s += self.content
 
-        return s.encode(ENCODING)
+        return s
+
+    def get_bytes(self):
+        return self.__str__().encode(ENCODING)
