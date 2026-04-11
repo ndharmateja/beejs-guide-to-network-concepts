@@ -62,20 +62,20 @@ def main():
     port = parse_port()
 
     # 1. Create a socket for listening
-    s = socket.socket()
-    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    listening_socket = socket.socket()
+    listening_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
     try:
         # 2. Bind the socket to a port
-        s.bind(("", port))
+        listening_socket.bind(("", port))
 
         # 3. Listen for incoming connections
-        s.listen()
+        listening_socket.listen()
         print(f"Listening for connections on port: {port}")
 
         # 4. Accept connection (in a loop) and send and receive data
         while True:
-            conn_socket, (client_ip, client_port) = s.accept()
+            conn_socket, (client_ip, client_port) = listening_socket.accept()
             print(f"Accepted a connection from [IP: {client_ip}, port: {client_port}]")
 
             try:
@@ -98,7 +98,7 @@ def main():
         print("\nKeyboardInterrupt: Shutting down the server.")
     finally:
         # Close the listening socket
-        s.close()
+        listening_socket.close()
         print("Listening socket closed.")
 
 
