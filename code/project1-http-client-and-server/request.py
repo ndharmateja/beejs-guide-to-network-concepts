@@ -45,6 +45,14 @@ class Request:
 
         return num_bytes_payload == content_length
 
+    def __str__(self):
+        output = f"method: {self.method}\n"
+        output += f"path: {self.path}\n"
+        output += f"http version: {self.version}\n"
+        if self.payload:
+            output += f"payload:\n{self.payload}\n"
+        return output
+
     def __init__(self, data: str):
         # At this point we know that the request data is valid
 
