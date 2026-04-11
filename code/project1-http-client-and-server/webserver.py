@@ -3,10 +3,7 @@ import socket
 import sys
 
 from constants import CRLF, DEFAULT_BUFFER_SIZE, DEFAULT_LISTENING_PORT, ENCODING
-
-
-class InvalidRequestException(Exception):
-    pass
+from errors import InvalidRequestException
 
 
 def parse_port():
