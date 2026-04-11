@@ -25,6 +25,26 @@ class Request:
         self.__host = host or self.DEFAULT_HOST
         self.__payload = payload
 
+    @property
+    def method(self):
+        return self.__method
+
+    @property
+    def path(self):
+        return self.__path
+
+    @property
+    def version(self):
+        return self.__version
+
+    @property
+    def payload(self):
+        return self.__payload
+
+    @property
+    def host(self):
+        return self.__host
+
     # Raises InvalidRequestException if specified content length is less than
     # the actual length of the payload
     @staticmethod
