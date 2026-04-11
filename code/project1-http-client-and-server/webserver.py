@@ -17,7 +17,12 @@ def parse_port():
     return port
 
 
-def receive_all_data(s):
+# Since client is not going to (atleast in the general case) close the
+# connection, recv() is not going to return an empty string like in the case
+# of webclient.py
+# So we have to look for the CRLF * 2 in the data
+def receive_all_data(s: socket.socket):
+    total_bytes = b""
     data = ""
     while True:
         # If client closes connection
