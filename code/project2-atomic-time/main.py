@@ -25,10 +25,10 @@ def main():
 
     # Since the bytes will be in big endian order
     nist_time = int.from_bytes(bytes, "big")
-    print(f"NIST time    : {nist_time}")
+    print(f"NIST time  : {nist_time}")
 
     # Print the system time
-    print(f"System time  : {system_seconds_since_1900()}")
+    print(f"System time: {system_seconds_since_1900()}")
 
 
 if __name__ == "__main__":
