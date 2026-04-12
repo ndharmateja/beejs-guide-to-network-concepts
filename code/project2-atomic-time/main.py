@@ -1,6 +1,10 @@
 import socket
 import time
 
+# There is a rate limit on the NIST server. Only one request per 4s.
+# So to account for this on multiple runs, we can run the program
+# using "sleep 4 && python main.py"
+
 
 def system_seconds_since_1900():
     # Number of seconds between 1900-01-01 and 1970-01-01
