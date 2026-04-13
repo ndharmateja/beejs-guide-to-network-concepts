@@ -4,3 +4,7 @@ class InvalidRequestException(Exception):
 
 class InvalidResponseException(Exception):
     pass
+
+
+class MimeTypeNotSupportedException(Exception):
+    pass
