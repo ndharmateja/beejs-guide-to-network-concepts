@@ -2,6 +2,7 @@ import re
 
 from constants import CRLF, ENCODING, ContentType, HttpMethod
 from errors import InvalidRequestException
+from request_builder import RequestBuilder
 
 
 class Request:
@@ -138,6 +139,11 @@ class Request:
         match = re.search(r"Host:\s*(\S*)", data, re.IGNORECASE)
         host = match.group(1) if match else cls.DEFAULT_HOST
 
+        # Create the request builder object
+        req_builder = RequestBuilder()
+        req_builder.set_path(path).set_method(method)
+        req_builder.set_host(host).set_version(version)
+
         # Check if the content length header exists
         double_crlf_index = data.find(CRLF * 2)
         match = re.search(r"Content-Length:\s*(\d+)", data, re.IGNORECASE)
@@ -152,26 +158,21 @@ class Request:
                 .encode(ENCODING)[:content_length]
                 .decode(ENCODING)
             )
+            req_builder.set_payload(payload)
 
             # Get content type
             try:
                 match = re.search(r"Content-Type:\s*(\S*)", data, re.IGNORECASE)
                 content_type_str = match.group(1).lower()
                 content_type = ContentType(content_type_str)
+                req_builder.set_content_type(content_type)
 
             except ValueError:
                 raise InvalidRequestException(
                     f"Invalid request. Invalid content type: {content_type_str}"
                 )
 
-        return cls(
-            method=method,
-            path=path,
-            version=version,
-            payload=payload,
-            host=host,
-            content_type=content_type,
-        )
+        return req_builder.build()
 
     def get_bytes(self):
         return self.__str__().encode(ENCODING)
