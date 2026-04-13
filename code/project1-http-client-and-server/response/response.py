@@ -45,6 +45,10 @@ class Response:
         return self.__content_type
 
     @classmethod
+    def create_404_response(cls):
+        return cls(status_code=404, status_message="Not Found", content="404 not found")
+
+    @classmethod
     def from_raw_data(cls, raw_bytes: bytes):
         """
         Parses raw bytes into a Response object.
