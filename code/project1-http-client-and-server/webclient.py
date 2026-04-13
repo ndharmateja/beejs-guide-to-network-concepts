@@ -68,7 +68,7 @@ class WebClient:
             # 4. Receive all the data
             raw_response_bytes = WebClient.receive_all_data(s)
             print("\nResponse:")
-            print(Response.decode_bytes(raw_response_bytes))
+            print(Response.from_raw_data(raw_response_bytes))
 
         # Handle error scenarios
         except socket.gaierror:
@@ -78,7 +78,7 @@ class WebClient:
         except socket.timeout:
             print(f"Error: Connection timed out.")
         except Exception as e:
-            print("Unexpected error: {e}.")
+            print(f"Unexpected error: {e}.")
 
         # Cleanup resources
         finally:
