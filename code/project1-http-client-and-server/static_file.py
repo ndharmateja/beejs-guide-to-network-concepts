@@ -15,9 +15,11 @@ class StaticFile:
     }
 
     def __init__(self, file_path):
+        self.base_dir = "static"
+
         if file_path == "/":
-            self.__content_bytes = "Hello!".encode(ENCODING)
-            self.__content_type = ContentType.TEXT_PLAIN
+            self.__content_bytes = self.generate_files_listing()
+            self.__content_type = ContentType.TEXT_HTML
             return
 
         # Get the filename
@@ -36,9 +38,23 @@ class StaticFile:
             )
 
         # Open the file and read the contents
-        with open(f"static/{file_name}", "rb") as f:
+        with open(os.path.join(self.base_dir, file_name), "rb") as f:
             self.__content_bytes = f.read()
             self.__content_type = self.EXTENSION_TO_MIME_TYPE[file_extension]
+
+    def generate_files_listing(self):
+        entries = os.listdir(self.base_dir)
+
+        # Start building the HTML
+        html = f"<html><head><title>Index</title></head><body>"
+        html += f"<h1>Index of /</h1><ul>"
+
+        # If entry is "cat.jpg", the link should be "/cat.jpg"
+        for entry in entries:
+            html += f'<li><a href="/{entry}">{entry}</a></li>'
+
+        html += "</ul></body></html>"
+        return html.encode(ENCODING)
 
     @property
     def content_bytes(self):
