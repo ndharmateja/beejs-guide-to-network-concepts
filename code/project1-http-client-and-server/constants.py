@@ -30,3 +30,4 @@ class ContentType(Enum):
     JPEG = "image/jpeg"
     PNG = "image/png"
     GIF = "image/gif"
+    ICO = "image/x-icon"
