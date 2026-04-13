@@ -9,6 +9,9 @@ class StaticFile:
         ".txt": ContentType.TEXT_PLAIN,
         ".html": ContentType.TEXT_HTML,
         ".ico": ContentType.ICO,
+        ".jpg": ContentType.JPEG,
+        ".jpeg": ContentType.JPEG,
+        ".pdf": ContentType.PDF,
     }
 
     def __init__(self, file_path):
