@@ -81,10 +81,21 @@ class WebServer:
                     conn_socket.sendall(response.get_bytes())
 
                 except InvalidRequestException as e:
-                    print(f"Invalid request: {e}")
+                    print(f"Invalid request: {str(e)}")
+                    response = Response.create_400_response(f"Invalid request.")
+                except MimeTypeNotSupportedException as e:
+                    print(f"Error handling connection: {str(e)}")
+                    response = Response.create_415_response(str(e))
+                except FileNotFoundError:
+                    print("File not found")
+                    response = Response.create_404_response()
                 except Exception as e:
-                    print(f"Error handling connection: {e}")
+                    print(f"Error handling connection: {str(e)}")
+                    response = Response.create_500_response(f"Unknown error.")
                 finally:
+                    # Send the response
+                    conn_socket.sendall(response.get_bytes())
+
                     # Close the connection socket
                     conn_socket.close()
                     print("Closed the connection with the client")
