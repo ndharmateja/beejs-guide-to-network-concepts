@@ -9,7 +9,7 @@ class ResponseBuilder:
         self.status_code = Response.DEFAULT_STATUS_CODE
         self.status_message = Response.DEFAULT_STATUS_MESSAGE
         self.version = Response.DEFAULT_VERSION
-        self.content = ""
+        self.content_bytes = b""
         self.content_type = Response.DEFAULT_CONTENT_TYPE
 
     def set_status(self, code: int, message: str):
@@ -21,8 +21,8 @@ class ResponseBuilder:
         self.version = version
         return self
 
-    def set_content(self, content: str, content_type: ContentType = None):
-        self.content = content
+    def set_content_bytes(self, content_bytes: bytes, content_type: ContentType = None):
+        self.content_bytes = content_bytes
         if content_type:
             if not isinstance(content_type, ContentType):
                 raise TypeError("content_type must be a valid ContentType enum")
@@ -34,7 +34,7 @@ class ResponseBuilder:
             status_code=self.status_code,
             status_message=self.status_message,
             version=self.version,
-            content=self.content,
+            content_bytes=self.content_bytes,
             content_type=self.content_type,
         )
 
@@ -50,13 +50,13 @@ class Response:
         status_code: int = None,
         status_message: str = None,
         version: str = None,
-        content: str = None,
+        content_bytes: bytes = None,
         content_type: ContentType = None,
     ):
         self.__status_code = status_code or self.DEFAULT_STATUS_CODE
         self.__status_message = status_message or self.DEFAULT_STATUS_MESSAGE
         self.__version = version or self.DEFAULT_VERSION
-        self.__content = content or ""
+        self.__content_bytes = content_bytes or b""
         self.__content_type = content_type or self.DEFAULT_CONTENT_TYPE
 
     @property
@@ -72,8 +72,8 @@ class Response:
         return self.__version
 
     @property
-    def content(self) -> str:
-        return self.__content
+    def content_bytes(self) -> bytes:
+        return self.__content_bytes
 
     @property
     def content_type(self) -> ContentType:
@@ -81,7 +81,11 @@ class Response:
 
     @classmethod
     def create_404_response(cls):
-        return cls(status_code=404, status_message="Not Found", content="404 not found")
+        return cls(
+            status_code=404,
+            status_message="Not Found",
+            content_bytes="404 not found".encode(ENCODING),
+        )
 
     @classmethod
     def from_raw_data(cls, raw_bytes: bytes):
@@ -94,14 +98,11 @@ class Response:
         boundary_index = raw_bytes.find(double_crlf_bytes)
 
         if boundary_index == -1:
-            # If no double CRLF, it might just be a status line or partial
             header_text = raw_bytes.decode(ENCODING)
-            body_text = ""
+            body_bytes = b""
         else:
             header_text = raw_bytes[:boundary_index].decode(ENCODING)
-            body_text = raw_bytes[boundary_index + len(double_crlf_bytes) :].decode(
-                ENCODING
-            )
+            body_bytes = raw_bytes[boundary_index + len(double_crlf_bytes) :]
 
         # 2. Parse Status Line (e.g., HTTP/1.1 200 OK)
         line_match = re.search(r"(HTTP/\d\.\d)\s+(\d+)\s+(.*)", header_text)
@@ -121,32 +122,27 @@ class Response:
             version=line_match.group(1),
             status_code=int(line_match.group(2)),
             status_message=line_match.group(3).strip(),
-            content=body_text,
+            content_bytes=body_bytes,
             content_type=content_type,
         )
 
     def __str__(self):
+        # We decode only for the string representation
+        body_text = self.__content_bytes.decode(ENCODING)
         return (
             f"{self.__version} {self.__status_code} {self.__status_message}\n"
             f"Content-Type: {self.__content_type.value}\n"
-            f"Content-Length: {len(self.__content.encode(ENCODING))}\n"
-            f"Body: {self.__content}"
+            f"Content-Length: {len(self.__content_bytes)}\n"
+            f"Body: {body_text}"
         )
 
     def get_bytes(self):
-        # Calculate content length in bytes to be encoding-safe
-        body_bytes = self.__content.encode(ENCODING)
-
         header_str = (
             f"{self.__version} {self.__status_code} {self.__status_message}{CRLF}"
         )
         header_str += f"Content-Type: {self.__content_type.value}{CRLF}"
-        header_str += f"Content-Length: {len(body_bytes)}{CRLF}"
+        header_str += f"Content-Length: {len(self.__content_bytes)}{CRLF}"
         header_str += f"Connection: close{CRLF}"
         header_str += CRLF
 
-        return header_str.encode(ENCODING) + body_bytes
-
-    @staticmethod
-    def decode_bytes(raw_bytes: bytes):
-        return raw_bytes.decode(ENCODING)
+        return header_str.encode(ENCODING) + self.__content_bytes
