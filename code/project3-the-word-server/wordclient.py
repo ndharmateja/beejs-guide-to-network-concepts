@@ -48,7 +48,7 @@ def get_next_word_packet(s: socket.socket):
         # If we reach here, it means that either there weren't even
         # WORD_LEN_SIZE + 1 bytes in the buffer or the full packet isn't present
         # So we receive the next bytes of the stream and go to the next iteration
-        received_bytes = s.recv(4096)
+        received_bytes = s.recv(2)
 
         # If connection is closed then 0 bytes are received, in which case we can
         # return None
