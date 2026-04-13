@@ -158,8 +158,9 @@ class Request:
         return s
 
     @classmethod
-    def from_raw_data(cls, data: str):
-        # At this point we know that the request data is valid
+    def from_raw_bytes(cls, bytes: bytes):
+        # Decode the bytes
+        data = bytes.decode(ENCODING)
 
         # Get the request method, path and version
         # Eg: "GET /index.html HTTP/1.1"
