@@ -1,11 +1,11 @@
-import re
 import socket
 import sys
 
-from constants import DEFAULT_BUFFER_SIZE, DEFAULT_LISTENING_PORT, ENCODING
-from errors import InvalidRequestException
+from constants import DEFAULT_BUFFER_SIZE, DEFAULT_LISTENING_PORT, ENCODING, ContentType
+from errors import InvalidRequestException, MimeTypeNotSupportedException
 from request import Request
-from response import ResponseBuilder
+from response import Response, ResponseBuilder
+from static_file import StaticFile
 
 
 def parse_port():
@@ -47,7 +47,7 @@ class WebServer:
             except UnicodeDecodeError:
                 continue
 
-        return total_bytes.decode(ENCODING)
+        return total_bytes
 
     def start(self):
         # 1. Create a socket for listening
@@ -72,13 +72,16 @@ class WebServer:
                 try:
                     # Receive the data
                     raw_request_data = WebServer.receive_all_data(conn_socket)
-                    request = Request.from_raw_data(raw_request_data)
+                    request = Request.from_raw_bytes(raw_request_data)
                     print(f"Request:\n[{request}]\n")
 
                     # Create the response and send it back
-                    response = ResponseBuilder().set_content("Hello!").build()
-                    print(f"Response:\n[{response}]\n")
-                    conn_socket.sendall(response.get_bytes())
+                    file = StaticFile(request.path)
+                    response = (
+                        ResponseBuilder()
+                        .set_content_bytes(file.content_bytes, file.content_type)
+                        .build()
+                    )
 
                 except InvalidRequestException as e:
                     print(f"Invalid request: {str(e)}")
