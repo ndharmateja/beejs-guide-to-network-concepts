@@ -88,6 +88,30 @@ class Response:
         )
 
     @classmethod
+    def create_400_response(cls, message: str = "Bad Request"):
+        return cls(
+            status_code=400,
+            status_message="Bad Request",
+            content_bytes=message.encode(ENCODING),
+        )
+
+    @classmethod
+    def create_415_response(cls, message: str = "Unsupported Media Type"):
+        return cls(
+            status_code=415,
+            status_message="Unsupported Media Type",
+            content_bytes=message.encode(ENCODING),
+        )
+
+    @classmethod
+    def create_500_response(cls, message: str = "Internal Server Error"):
+        return cls(
+            status_code=500,
+            status_message="Internal Server Error",
+            content_bytes=message.encode(ENCODING),
+        )
+
+    @classmethod
     def from_raw_data(cls, raw_bytes: bytes):
         """
         Parses raw bytes into a Response object.
