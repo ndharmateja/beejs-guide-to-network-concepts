@@ -57,6 +57,7 @@ class WebClient:
             request = (
                 RequestBuilder()
                 .set_host(self.url)
+                .set_path("/file1.txt")
                 .set_content_type(ContentType.TEXT_PLAIN)
                 .set_payload("hey!")
                 .build()
