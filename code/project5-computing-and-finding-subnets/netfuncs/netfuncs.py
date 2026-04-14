@@ -151,6 +151,21 @@ def get_subnet_mask_value(slash: str) -> int:
     return method3()
 
 
+def get_network(ip_value: int, netmask: int) -> int:
+    """
+    Return the network portion of an address value as integer type.
+
+    Example:
+
+    ip_value: 0x01020304
+    netmask:  0xffffff00
+    return:   0x01020300
+    """
+
+    # We just have to a bitwise AND between the IP and the subnet mask
+    return ip_value & netmask
+
+
 def ips_same_subnet(ip1: str, ip2: str, slash: str) -> bool:
     """
     Given two dots-and-numbers IP addresses and a subnet mask in slash
@@ -178,23 +193,24 @@ def ips_same_subnet(ip1: str, ip2: str, slash: str) -> bool:
     return: False
     """
 
-    # TODO -- write me!
-    pass
+    # Get the numerical values of the IPs
+    ip1_val = ipv4_to_value(ip1)
+    ip2_val = ipv4_to_value(ip2)
 
+    # Get the network values for both IPs and compare them
+    def method1():
+        subnet_mask = get_subnet_mask_value(slash)
+        return get_network(ip1_val, subnet_mask) == get_network(ip2_val, subnet_mask)
 
-def get_network(ip_value: int, netmask: int) -> int:
-    """
-    Return the network portion of an address value as integer type.
+    # Right shift by the number of host bits and the values should match
+    # Number of network bits
+    def method2():
+        n = int(slash[slash.find("/") + 1 :])
+        h = 32 - n
+        return (ip1_val >> h) == (ip2_val >> h)
 
-    Example:
-
-    ip_value: 0x01020304
-    netmask:  0xffffff00
-    return:   0x01020300
-    """
-
-    # We just have to a bitwise AND between the IP and the subnet mask
-    return ip_value & netmask
+    # Return result
+    return method2()
 
 
 def find_router_for_ip(routers: dict[str, dict[str, str]], ip: str) -> str | None:
@@ -258,10 +274,6 @@ def my_tests():
     print("All test cases for ipv4_to_value successfully passed!")
 
     # value_to_ipv4
-    # addr:   0xffff0000 0b11111111111111110000000000000000 4294901760
-    # return: "255.255.0.0"
-    # addr:   0x01020304 0b00000001000000100000001100000100 16909060
-    # return: "1.2.3.4"
     assert value_to_ipv4(0xFFFF0000) == "255.255.0.0"
     assert value_to_ipv4(0x01020304) == "1.2.3.4"
     assert value_to_ipv4(16909060) == "1.2.3.4"
@@ -285,14 +297,20 @@ def my_tests():
     print("All test cases for get_subnet_mask_value successfully passed!")
 
     # ips_same_subnet
-    # assert ips_same_subnet("1.2.3.4", "1.2.3.5", "/24") is True
-    # assert ips_same_subnet("1.2.3.4", "1.2.3.5", "/23") is False
-    # assert ips_same_subnet("1.2.3.4", "1.2.3.5", "/22") is False
-    # assert ips_same_subnet("1.2.3.4", "1.2.3.5", "/21") is False
-    # assert ips_same_subnet("1.2.3.4", "1.2.3.5", "/20") is False
-    # assert ips_same_subnet("1.2.3.4", "1.2.3.5", "/19") is False
-    # assert ips_same_subnet("1.2.3.4", "1.2.3.5", "/18") is False
-    # assert ips_same_subnet("1.2.3.4", "1.2.3.5", "/17") is False
+    assert ips_same_subnet("1.2.3.4", "1.2.3.5", "/24") is True
+    assert ips_same_subnet("1.2.3.4", "1.2.3.5", "/31") is True
+    assert ips_same_subnet("1.2.3.4", "1.2.3.5", "/32") is False
+    assert ips_same_subnet("1.2.2.1", "1.2.3.1", "/23") is True
+    assert ips_same_subnet("1.2.2.1", "1.2.3.1", "/24") is False
+    assert ips_same_subnet("10.20.30.40", "10.20.30.40", "/32") is True
+    assert ips_same_subnet("192.168.0.100", "192.168.0.100", "/0") is True
+    assert ips_same_subnet("0.0.0.0", "255.255.255.255", "/0") is True
+    assert ips_same_subnet("172.16.0.1", "172.31.255.254", "/12") is True
+    assert ips_same_subnet("172.16.0.1", "172.32.0.1", "/12") is False
+    assert ips_same_subnet("192.168.1.64", "192.168.1.127", "/26") is True
+    assert ips_same_subnet("192.168.1.127", "192.168.1.128", "/26") is False
+    assert ips_same_subnet("8.8.8.8", "8.8.8.9", "/31") is True
+    print("All test cases for ips_same_subnet successfully passed!")
 
     # get_network
     # The IP: 192.168.0.65 -> 3232235585
