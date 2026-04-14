@@ -31,7 +31,13 @@ def make_pseudo_ip_header(src_ip: bytes, dest_ip: bytes, tcp_data_len: int) -> b
     return src_ip + dest_ip + b"\x00" + b"\x06" + tcp_data_len_bytes
 
 
-def compute_cksum(data: bytes):
+# Checksum definition: The checksum field is the 16-bit one's complement of the
+# one's complement sum of all 16-bit words in the header and text.
+def compute_cksum(pseudo_ip_header: bytes, tcp_zero_cksum_data: bytes) -> int:
+    # Concatenate the data
+    data: bytes = pseudo_ip_header + tcp_zero_cksum_data
+
+    # Loop over 2 bytes (16 bits) at a time to compute the checksum
     total = 0
     for i in range(0, len(data), 2):
         # Get the 16-bit word's value by slicing two bytes at a time
@@ -40,11 +46,14 @@ def compute_cksum(data: bytes):
 
         # In one's complement, we add the 17th bit to the sum
         # That is the carry around which we can get by "total >> 16"
+        # total & 0xFFFF gives us the lowest 16 bits
+        # to which we are adding the carry around (if it exists) in the 17th bit
         total += value
         total = (total & 0xFFFF) + (total >> 16)
 
     # Return one's complement of the total sum
     # The ~ in python for a positive number generally gives us a negative number
+    # because it uses arbitrary precision arithmetic
     # to keep it in the 16 bit range, we and it with 0xFFFF
     return (~total) & 0xFFFF
 
@@ -73,8 +82,7 @@ def main():
             tcp_zero_cksum_data += b"\x00"
 
         # Concatenate the pseudo IP header and the TCP data (header + payload) to compute cksum
-        data: bytes = pseudo_ip_header + tcp_zero_cksum_data
-        computed_cksum = compute_cksum(data)
+        computed_cksum = compute_cksum(pseudo_ip_header, tcp_zero_cksum_data)
 
         # Check if the computed cksum matches the original cksum
         if computed_cksum == orig_cksum:
