@@ -16,8 +16,44 @@ def ipv4_to_value(ipv4_addr: str) -> int:
     return:    16909060  (Which is 0x01020304 hex)
     """
 
-    # TODO -- write me!
-    pass
+    # nums = [1, 2, 3, 4]
+    nums = [int(x) for x in ipv4_addr.split(".")]
+
+    # Method 1:
+    # accumulate the value using left shifts and or operations
+    #        0 << 8 | 1 = 0x01
+    #     0x01 << 8 | 2 = 0x0102
+    #   0x0102 << 8 | 3 = 0x010203
+    # 0x010203 << 8 | 4 = 0x01020304
+    # This is the same as calculating ax^3 + bx^2 + cx + d
+    # using Horner's method with x = 256. (((ax + b)x + c)x + d
+    # Instead of multiplying by 256 each time we are left shifting by 8
+    # and instead of adding, we are doing | and it is the same as after
+    # shifting by 8 bits the remaining 8 bits are 0s so adding or oring with
+    # an 8 bit number is the same.
+    # 0x0100 + 0x02 = 0x0100 | 0x02 = 0x0102
+    def method1():
+        val = 0
+        for num in nums:
+            val = (val << 8) | num
+        return val
+
+    # Method 2:
+    # Directly do the required shift in one go and accumulate
+    # (1 << 24) | (2 << 16) | (3 << 8) | (4 << 0) = 0x01020304
+    def method2():
+        val = 0
+        for i, num in enumerate(nums):
+            val |= num << ((3 - i) * 8)
+        return val
+
+    # Method 3:
+    # Convert it into a bytes array and then create an int out of it
+    def method3():
+        return int.from_bytes(bytes(nums), "big")
+
+    # Return answer
+    return method3()
 
 
 def value_to_ipv4(addr: int) -> str:
@@ -36,8 +72,31 @@ def value_to_ipv4(addr: int) -> str:
     return: "1.2.3.4"
     """
 
-    # TODO -- write me!
-    pass
+    # Method 1:
+    # Extracting one byte at a time with AND and right shifts
+    def method1():
+        # the tuple (24, 16, 8, 0) can also created programmatically
+        # for let's say IPv6
+        # shifts = range((num_bytes - 1) * 8, -1, -8)
+        # For IPv4 (4 bytes): (24, 16, 8, 0)
+        # For IPv6 (16 bytes): (120, 112, ..., 0)
+        octets = []
+        for shift in (24, 16, 8, 0):
+            octets.append(str((addr >> shift) & 0xFF))
+
+        # result at this point will be ["255", "255", "0", "0"]
+        return ".".join(octets)
+
+    # Method 2:
+    # By converting the number in to a bytes string
+    def method2():
+        bytes_str = addr.to_bytes(4, "big")
+
+        # bytes_str will be b"\xff\xff\x00\x00" at this point
+        return ".".join(str(byte) for byte in bytes_str)
+
+    # Return result
+    return method2()
 
 
 def get_subnet_mask_value(slash: str) -> int:
@@ -159,7 +218,32 @@ def my_tests():
     print("This is the result of my custom tests")
     print("-------------------------------------")
 
-    # Add custom test code here
+    # Test cases
+    # ipv4_to_value
+    assert ipv4_to_value("0.0.0.0") == 0
+    assert ipv4_to_value("255.255.255.255") == 4294967295
+    assert ipv4_to_value("192.168.0.1") == 3232235521
+    assert ipv4_to_value("10.0.0.1") == 167772161
+    assert ipv4_to_value("1.2.3.4") == 16909060
+    assert ipv4_to_value("255.255.0.0") == 4294901760
+    print("All test cases for ipv4_to_value successfully passed!")
+
+    # value_to_ipv4
+    # addr:   0xffff0000 0b11111111111111110000000000000000 4294901760
+    # return: "255.255.0.0"
+    # addr:   0x01020304 0b00000001000000100000001100000100 16909060
+    # return: "1.2.3.4"
+    assert value_to_ipv4(0xFFFF0000) == "255.255.0.0"
+    assert value_to_ipv4(0x01020304) == "1.2.3.4"
+    assert value_to_ipv4(16909060) == "1.2.3.4"
+    assert value_to_ipv4(167772161) == "10.0.0.1"
+    assert value_to_ipv4(3232235521) == "192.168.0.1"
+    assert value_to_ipv4(4294967295) == "255.255.255.255"
+    print("All test cases for value_to_ipv4 successfully passed!")
+
+    # get_subnet_mask_value
+
+    # ips_same_subnet
 
 
 ## -------------------------------------------
