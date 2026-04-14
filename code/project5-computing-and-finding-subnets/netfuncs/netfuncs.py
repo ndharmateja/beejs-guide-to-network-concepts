@@ -154,16 +154,13 @@ def find_router_for_ip(routers: dict[str, dict[str, str]], ip: str) -> str | Non
 
 # Uncomment this code to have it run instead of the real main.
 # Be sure to comment it back out before you submit!
-"""
 def my_tests():
     print("-------------------------------------")
     print("This is the result of my custom tests")
     print("-------------------------------------")
 
-    print(x)
-
     # Add custom test code here
-"""
+
 
 ## -------------------------------------------
 ## Do not modify below this line
