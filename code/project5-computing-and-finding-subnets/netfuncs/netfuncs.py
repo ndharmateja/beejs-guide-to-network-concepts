@@ -118,8 +118,24 @@ def get_subnet_mask_value(slash: str) -> int:
     return: 0xfffffe00 0b11111111111111111111111000000000 4294966784
     """
 
-    # TODO -- write me!
-    pass
+    # Get the number of network bits
+    # It is the int(sliced part after the / in the slash string)
+    n = int(slash[slash.find("/") + 1 :])
+
+    # Generate n 1s first by using (1 << n) - 1
+    # which is (1 followed by n 0s) - 1
+    # which is n 1s
+    # and then add (32 - n) 0s at the end by left shifting
+    # Gotcha: If n = 32, 1 << 32 will be undefined in C and C++
+    def method1():
+        return ((1 << n) - 1) << (32 - n)
+
+    # Method 2:
+    def method2():
+        return (0xFFFFFFFF << (32 - n)) & 0xFFFFFFFF
+
+    # Return result
+    return method2()
 
 
 def ips_same_subnet(ip1: str, ip2: str, slash: str) -> bool:
@@ -242,6 +258,18 @@ def my_tests():
     print("All test cases for value_to_ipv4 successfully passed!")
 
     # get_subnet_mask_value
+    assert get_subnet_mask_value("/16") == 0xFFFF0000
+    assert get_subnet_mask_value("10.20.30.40/23") == 0xFFFFFE00
+    assert get_subnet_mask_value("10.20.30.40/24") == 0xFFFFFF00
+    assert get_subnet_mask_value("10.20.30.40/25") == 0xFFFFFF80
+    assert get_subnet_mask_value("10.20.30.40/26") == 0xFFFFFFC0
+    assert get_subnet_mask_value("10.20.30.40/27") == 0xFFFFFFE0
+    assert get_subnet_mask_value("10.20.30.40/28") == 0xFFFFFFF0
+    assert get_subnet_mask_value("10.20.30.40/29") == 0xFFFFFFF8
+    assert get_subnet_mask_value("10.20.30.40/30") == 0xFFFFFFFC
+    assert get_subnet_mask_value("10.20.30.40/31") == 0xFFFFFFFE
+    assert get_subnet_mask_value("10.20.30.40/32") == 0xFFFFFFFF
+    print("All test cases for get_subnet_mask_value successfully passed!")
 
     # ips_same_subnet
 
