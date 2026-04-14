@@ -252,8 +252,18 @@ def find_router_for_ip(routers: dict[str, dict[str, str]], ip: str) -> str | Non
     return: None
     """
 
-    # TODO -- write me!
-    pass
+    # Go through each router in the routers dictionary and get it's network bits
+    # For each router (and its IP) we can compare with the our ip and the router's IP
+    # if they are on the same subnet using the number of network bits
+    for router_ip, router_data in routers.items():
+        slash = router_data["netmask"]
+
+        # Return the IP of the first router on whose subnet the ip is
+        if ips_same_subnet(ip, router_ip, slash):
+            return router_ip
+
+    # If we reach here, it means that it's not on any of the subnets
+    return None
 
 
 # Uncomment this code to have it run instead of the real main.
