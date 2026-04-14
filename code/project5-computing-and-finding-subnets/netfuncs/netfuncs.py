@@ -203,8 +203,8 @@ def ips_same_subnet(ip1: str, ip2: str, slash: str) -> bool:
         return get_network(ip1_val, subnet_mask) == get_network(ip2_val, subnet_mask)
 
     # Right shift by the number of host bits and the values should match
-    # Number of network bits
     def method2():
+        # Get the number of network and host bits
         n = int(slash[slash.find("/") + 1 :])
         h = 32 - n
         return (ip1_val >> h) == (ip2_val >> h)
