@@ -124,6 +124,8 @@ def get_subnet_mask_value(slash: str) -> int:
     h = 32 - n
 
     # Edge cases:
+    # Not necessary for python, but C and C++ have undefined behaviour
+    # when ints are shifted by 32 bits
     if n == 0:
         return 0
     if n == 32:
@@ -283,6 +285,14 @@ def my_tests():
     print("All test cases for get_subnet_mask_value successfully passed!")
 
     # ips_same_subnet
+    # assert ips_same_subnet("1.2.3.4", "1.2.3.5", "/24") is True
+    # assert ips_same_subnet("1.2.3.4", "1.2.3.5", "/23") is False
+    # assert ips_same_subnet("1.2.3.4", "1.2.3.5", "/22") is False
+    # assert ips_same_subnet("1.2.3.4", "1.2.3.5", "/21") is False
+    # assert ips_same_subnet("1.2.3.4", "1.2.3.5", "/20") is False
+    # assert ips_same_subnet("1.2.3.4", "1.2.3.5", "/19") is False
+    # assert ips_same_subnet("1.2.3.4", "1.2.3.5", "/18") is False
+    # assert ips_same_subnet("1.2.3.4", "1.2.3.5", "/17") is False
 
 
 ## -------------------------------------------
