@@ -193,8 +193,8 @@ def get_network(ip_value: int, netmask: int) -> int:
     return:   0x01020300
     """
 
-    # TODO -- write me!
-    pass
+    # We just have to a bitwise AND between the IP and the subnet mask
+    return ip_value & netmask
 
 
 def find_router_for_ip(routers: dict[str, dict[str, str]], ip: str) -> str | None:
@@ -293,6 +293,19 @@ def my_tests():
     # assert ips_same_subnet("1.2.3.4", "1.2.3.5", "/19") is False
     # assert ips_same_subnet("1.2.3.4", "1.2.3.5", "/18") is False
     # assert ips_same_subnet("1.2.3.4", "1.2.3.5", "/17") is False
+
+    # get_network
+    # The IP: 192.168.0.65 -> 3232235585
+    ip = 3232235585
+    assert get_network(ip, 0x00000000) == 0
+    assert get_network(ip, 0xFFFF0000) == 3232235520
+    assert get_network(ip, 0xFFFFFF00) == 3232235520
+    assert get_network(ip, 0xFFFFFF80) == 3232235520
+    assert get_network(ip, 0xFFFFFFC0) == 3232235584
+    assert get_network(ip, 0xFFFFFFFC) == 3232235584
+    assert get_network(ip, 0xFFFFFFFE) == 3232235584
+    assert get_network(ip, 0xFFFFFFFF) == 3232235585
+    print("All test cases for get_network successfully passed!")
 
 
 ## -------------------------------------------
