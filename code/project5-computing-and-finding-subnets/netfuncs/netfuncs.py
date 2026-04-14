@@ -118,9 +118,16 @@ def get_subnet_mask_value(slash: str) -> int:
     return: 0xfffffe00 0b11111111111111111111111000000000 4294966784
     """
 
-    # Get the number of network bits
+    # Get the number of network bits and host bits
     # It is the int(sliced part after the / in the slash string)
     n = int(slash[slash.find("/") + 1 :])
+    h = 32 - n
+
+    # Edge cases:
+    if n == 0:
+        return 0
+    if n == 32:
+        return 0xFFFFFFFF
 
     # Generate n 1s first by using (1 << n) - 1
     # which is (1 followed by n 0s) - 1
@@ -128,14 +135,18 @@ def get_subnet_mask_value(slash: str) -> int:
     # and then add (32 - n) 0s at the end by left shifting
     # Gotcha: If n = 32, 1 << 32 will be undefined in C and C++
     def method1():
-        return ((1 << n) - 1) << (32 - n)
+        return ((1 << n) - 1) << h
 
     # Method 2:
     def method2():
-        return (0xFFFFFFFF << (32 - n)) & 0xFFFFFFFF
+        return (0xFFFFFFFF << h) & 0xFFFFFFFF
+
+    # Method 3:
+    def method3():
+        return ((0xFFFFFFFF) >> h) << h
 
     # Return result
-    return method2()
+    return method3()
 
 
 def ips_same_subnet(ip1: str, ip2: str, slash: str) -> bool:
