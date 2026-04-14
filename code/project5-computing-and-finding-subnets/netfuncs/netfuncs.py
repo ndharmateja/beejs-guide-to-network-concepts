@@ -271,7 +271,7 @@ def my_tests():
     assert ipv4_to_value("10.0.0.1") == 167772161
     assert ipv4_to_value("1.2.3.4") == 16909060
     assert ipv4_to_value("255.255.0.0") == 4294901760
-    print("All test cases for ipv4_to_value successfully passed!")
+    print("All test cases successfully passed for: ipv4_to_value")
 
     # value_to_ipv4
     assert value_to_ipv4(0xFFFF0000) == "255.255.0.0"
@@ -280,7 +280,7 @@ def my_tests():
     assert value_to_ipv4(167772161) == "10.0.0.1"
     assert value_to_ipv4(3232235521) == "192.168.0.1"
     assert value_to_ipv4(4294967295) == "255.255.255.255"
-    print("All test cases for value_to_ipv4 successfully passed!")
+    print("All test cases successfully passed for: value_to_ipv4")
 
     # get_subnet_mask_value
     assert get_subnet_mask_value("/16") == 0xFFFF0000
@@ -294,7 +294,7 @@ def my_tests():
     assert get_subnet_mask_value("10.20.30.40/30") == 0xFFFFFFFC
     assert get_subnet_mask_value("10.20.30.40/31") == 0xFFFFFFFE
     assert get_subnet_mask_value("10.20.30.40/32") == 0xFFFFFFFF
-    print("All test cases for get_subnet_mask_value successfully passed!")
+    print("All test cases successfully passed for: get_subnet_mask_value")
 
     # ips_same_subnet
     assert ips_same_subnet("1.2.3.4", "1.2.3.5", "/24") is True
@@ -310,7 +310,7 @@ def my_tests():
     assert ips_same_subnet("192.168.1.64", "192.168.1.127", "/26") is True
     assert ips_same_subnet("192.168.1.127", "192.168.1.128", "/26") is False
     assert ips_same_subnet("8.8.8.8", "8.8.8.9", "/31") is True
-    print("All test cases for ips_same_subnet successfully passed!")
+    print("All test cases successfully passed for: ips_same_subnet")
 
     # get_network
     # The IP: 192.168.0.65 -> 3232235585
@@ -323,7 +323,7 @@ def my_tests():
     assert get_network(ip, 0xFFFFFFFC) == 3232235584
     assert get_network(ip, 0xFFFFFFFE) == 3232235584
     assert get_network(ip, 0xFFFFFFFF) == 3232235585
-    print("All test cases for get_network successfully passed!")
+    print("All test cases successfully passed for: get_network")
 
 
 ## -------------------------------------------
@@ -400,7 +400,7 @@ def print_ip_routers(routers, src_dest_pairs):
 def main(argv):
     if "my_tests" in globals() and callable(my_tests):
         my_tests()
-        return 0
+        # return 0
 
     try:
         router_file_name = argv[1]
