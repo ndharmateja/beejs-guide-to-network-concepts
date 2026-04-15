@@ -21,10 +21,10 @@ def ipv4_to_value(ipv4_addr: str) -> int:
 
     # Method 1:
     # accumulate the value using left shifts and or operations
-    #        0 << 8 | 1 = 0x01
-    #     0x01 << 8 | 2 = 0x0102
-    #   0x0102 << 8 | 3 = 0x010203
-    # 0x010203 << 8 | 4 = 0x01020304
+    # (       0 << 8 | 1) = 0x01
+    # (    0x01 << 8 | 2) = 0x0102
+    # (  0x0102 << 8 | 3) = 0x010203
+    # (0x010203 << 8 | 4) = 0x01020304
     # This is the same as calculating ax^3 + bx^2 + cx + d
     # using Horner's method with x = 256. (((ax + b)x + c)x + d
     # Instead of multiplying by 256 each time we are left shifting by 8
